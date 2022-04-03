@@ -2,16 +2,12 @@ import {Controller} from "@hotwired/stimulus"
 
 export default class extends Controller {
   static values = {
-    bold: {type: Boolean, default: false},
-    italic: {type: Boolean, default: false},
     defaultColor: {type: String, default: "#000000"},
     color: {type: String, default: "#000000"},
-    fontSizes: Object,
-    first_layout: { type: Boolean, default: false }
   }
 
   static classes = ["active", "inactive", "linkError"]
-  static targets = ["backgroundColor", "textColor"]
+  static targets = ["backgroundColor", "textColor", "underlineColorPicker", "underlineColorPickerModal"]
 
   initialize() {
     this.allowSync = true
@@ -22,8 +18,10 @@ export default class extends Controller {
     this.colorValue = e.detail
     if(this.backgroundColorTarget.contains(e.target)) {
       this.trixEditor.activateAttribute("backgroundColor", e.detail)
-    } else {
+    } else if(this.textColorTarget.contains(e.target)) {
       this.trixEditor.activateAttribute("foregroundColor", e.detail)
+    } else {
+      this.trixEditor.activateAttribute("underlineColor", e.detail)
     }
   }
 
@@ -43,7 +41,52 @@ export default class extends Controller {
       inheritable: 1
     }
 
+    Trix.config.textAttributes.underline = {
+      style: { textDecoration: "underline" },
+      parser: function(element) {
+        return element.style.textDecoration === "underline"
+      },
+      inheritable: 1
+    }
+
+    Trix.config.textAttributes.underlineColor = {
+      styleProperty: "text-decoration-color",
+      inheritable: 1
+    }
+
     this.trix = this.element.querySelector("trix-editor")
+  }
+
+  toggleUnderline() {
+    if(this.trixEditor.attributeIsActive("underline")) {
+      this.trixEditor.deactivateAttribute("underline")
+    } else {
+      this.trixEditor.activateAttribute("underline")
+    }
+
+    this.trix.focus()
+  }
+
+  sync() {
+    if(this.trixEditor.attributeIsActive("underline")) {
+      this.underlineColorPickerTarget.disabled = false
+      this.underlineColorPickerTarget.classList.remove("text-gray-300")
+    } else {
+      this.underlineColorPickerTarget.disabled = true
+      this.underlineColorPickerTarget.classList.add("text-gray-300")
+    }
+  }
+
+  toggleUnderlineColorPicker() {
+    const piece = this.trixEditorDocument.getPieceAtPosition(this.trixEditor.getPosition());
+
+    if (piece.attributes.has("underline")) {
+      const indexOfPiece = this.trixEditorDocument.toString().indexOf(piece.toString())
+      const textRange = [indexOfPiece, indexOfPiece + piece.length]
+      this.trixEditor.setSelectedRange(textRange)
+    }
+
+    this.underlineColorPickerModalTarget.classList.toggle("hidden")
   }
 
   get trixEditor() {

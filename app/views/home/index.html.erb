@@ -3,7 +3,7 @@
      data-controller="trix">
   <div class="w-6/12">
 
-    <div id="toolbar" class="flex justify-center shadow-xl rounded-md p-5 mb-5 w-fit">
+    <div id="toolbar" class="flex justify-center items-center shadow-xl rounded-md p-5 mb-5 w-fit">
       <div data-controller="dropdown color-picker"
            data-trix-target="backgroundColor"
            class="relative w-8 h-8 text-black flex flex-col justify-center items-center">
@@ -56,8 +56,35 @@
 
         <!--        <div class="w-5 h-2 rounded-md bg-black"></div>-->
       </div>
+
+
+      <button data-action="click->trix#toggleUnderline" class="w-5 h-5 flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 360 360" style="enable-background:new 0 0 360 360;" xml:space="preserve">
+          <g>
+            <rect x="62.877" y="330" width="234.245" height="30"/>
+            <path d="M180,290c61.825,0,112.123-50.298,112.123-112.122V0h-30v177.878C262.123,223.16,225.283,260,180,260   s-82.123-36.84-82.123-82.122V0h-30v177.878C67.877,239.702,118.175,290,180,290z"/>
+          </g>
+        </svg>
+      </button>
+
+      <button disabled data-controller="color-picker" data-trix-target="underlineColorPicker"   data-action="click->trix#toggleUnderlineColorPicker" class="relative text-gray-300">
+        <span class="w-5 h-5 flex items-center justify-center">
+          <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="0 0 360 360" style="enable-background:new 0 0 360 360;" xml:space="preserve">
+            <g>
+              <rect x="62.877" y="330" width="234.245" height="30"/>
+              <path d="M180,290c61.825,0,112.123-50.298,112.123-112.122V0h-30v177.878C262.123,223.16,225.283,260,180,260   s-82.123-36.84-82.123-82.122V0h-30v177.878C67.877,239.702,118.175,290,180,290z"/>
+            </g>
+          </svg>
+        </span>
+
+        <span data-trix-target="underlineColorPickerModal" data-action="click@window->dropdown#hide" class="hidden absolute -right-[20rem] bg-indigo-700 rounded-md p-2 shadow-xl">
+          <span data-color-picker-target="picker">
+
+          </span>
+        </span>
+      </button>
     </div>
 
-    <%= rich_text_area_tag "content", "", class: "w-full no-toolbar" %>
+    <%= rich_text_area_tag "content", "", class: "w-full no-toolbar", data: { action: "keydown->trix#sync keyup->trix#sync" } %>
   </div>
 </div>
