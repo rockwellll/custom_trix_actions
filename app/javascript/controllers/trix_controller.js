@@ -7,7 +7,7 @@ export default class extends Controller {
   }
 
   static classes = ["active", "inactive", "linkError"]
-  static targets = ["backgroundColor", "textColor", "underlineColorPicker", "underlineColorPickerModal"]
+  static targets = ["backgroundColor", "textColor", "underlineColorPicker", "underlineColorPickerModal", "fontSizeControls", "fontSizeInput"]
 
   initialize() {
     this.allowSync = true
@@ -28,6 +28,12 @@ export default class extends Controller {
   connect() {
     this.element.classList.add(...this.inactiveClasses)
     this.element.classList.remove(...this.activeClasses)
+  }
+
+  markSelection() {
+    this.trixEditor.activateAttribute("frozen")
+    this.fontSizeInputTarget.focus()
+    this.trix.blur()
   }
 
   setupTrix() {
@@ -54,7 +60,17 @@ export default class extends Controller {
       inheritable: 1
     }
 
+    Trix.config.textAttributes.fontSize = {
+      styleProperty: "font-size",
+      inheritable: 1
+    }
+
     this.trix = this.element.querySelector("trix-editor")
+  }
+
+  changeSelectionFontSize({ detail: font }) {
+    this.trixEditor.activateAttribute("fontSize", font.px)
+    this.trixEditor.deactivateAttribute("frozen")
   }
 
   toggleUnderline() {
@@ -75,10 +91,17 @@ export default class extends Controller {
       this.underlineColorPickerTarget.disabled = true
       this.underlineColorPickerTarget.classList.add("text-gray-300")
     }
+
+    if (this.pieceAtCursor.attributes.has("fontSize")) {
+      this.dispatch("font-size:sync", {
+        target: this.fontSizeControlsTarget,
+        detail: this.pieceAtCursor.getAttribute("fontSize")
+      })
+    }
   }
 
   toggleUnderlineColorPicker() {
-    const piece = this.trixEditorDocument.getPieceAtPosition(this.trixEditor.getPosition());
+    const piece = this.pieceAtCursor
 
     if (piece.attributes.has("underline")) {
       const indexOfPiece = this.trixEditorDocument.toString().indexOf(piece.toString())
@@ -87,6 +110,10 @@ export default class extends Controller {
     }
 
     this.underlineColorPickerModalTarget.classList.toggle("hidden")
+  }
+
+  get pieceAtCursor() {
+    return this.trixEditorDocument.getPieceAtPosition(this.trixEditor.getPosition())
   }
 
   get trixEditor() {
